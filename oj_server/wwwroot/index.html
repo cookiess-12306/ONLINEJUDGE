@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeSpace - 个人OJ系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 5%;
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .navbar a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #4ecca3;
+            transition: width 0.3s ease;
+        }
+
+        .navbar a:hover {
+            color: #4ecca3;
+        }
+
+        .navbar a:hover::after {
+            width: 100%;
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 150px 2rem 2rem;
+            text-align: center;
+        }
+
+        .hero {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4rem 2rem;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #4ecca3, #45b08c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #eeeeee;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            background: linear-gradient(45deg, #4ecca3, #45b08c);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(78, 204, 163, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(78, 204, 163, 0.5);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/all_questions">题库</a>
+        </div>
+        <a href="#" class="login">登录</a>
+    </nav>
+
+    <div class="content">
+        <div class="hero">
+            <h1>欢迎来到 CodeSpace</h1>
+            <p>一个为编程爱好者打造的现代化OJ平台<br>支持C/C++编程语言，实时判题反馈，提升你的算法能力</p>
+            <a href="/all_questions" class="cta-button">立即开始挑战 →</a>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <h3>📚 丰富题库</h3>
+                <p>涵盖算法、数据结构、编程竞赛等各类题目</p>
+            </div>
+            <div class="feature-card">
+                <h3>⚡ 实时判题</h3>
+                <p>毫秒级代码评测，即时反馈运行结果</p>
+            </div>
+            <div class="feature-card">
+                <h3>📈 成长体系</h3>
+                <p>可视化练习进度，成就系统助你持续进步</p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

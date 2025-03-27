@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{number}}.{{title}}</title>
+
+    <!-- Monaco Editor 资源 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem 5%;
+            backdrop-filter: blur(10px);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .navbar a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #4ecca3;
+            transition: width 0.3s ease;
+        }
+
+        .navbar a:hover {
+            color: #4ecca3;
+        }
+
+        .navbar a:hover::after {
+            width: 100%;
+        }
+
+        /* 主要内容容器 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 2rem 2rem;
+        }
+
+        /* 题目容器布局 */
+        .problem-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            min-height: 70vh;
+        }
+
+        /* 题目描述区域 */
+        .problem-description {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+        }
+
+        /* 编辑器容器 */
+        .editor-container {
+            background: #1e1e1e;
+            border-radius: 15px;
+            overflow: hidden;
+            height: auto;
+        }
+
+        /* 操作区域 */
+        .action-area {
+            position: relative;
+            bottom: 20px;
+            margin-top: 2rem;
+            z-index: 1000;
+        }
+
+        /* 提交按钮 */
+        .submit-btn {
+            background: linear-gradient(45deg, #4ecca3, #45b08c);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            float: right;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 204, 163, 0.3);
+        }
+
+        /* 结果面板 */
+        .result-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            max-height: 1000px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-panel.expanded {
+            max-height: 600px;
+        }
+
+        /* 题目标题 */
+        .problem-title {
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            color: #4ecca3;
+        }
+
+        /* 难度标签 */
+        .difficulty-tag {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-left: 1rem;
+        }
+
+        .easy {
+            background: rgba(78, 204, 163, 0.2);
+            color: #4ecca3;
+        }
+
+        .medium {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .hard {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+
+        .error-box {
+            background: rgba(220, 53, 69, 0.15);
+            border: 1px solid #dc3545;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+        }
+
+        .test-case.failed {
+            color: #dc3545;
+        }
+
+        .test-case.passed {
+            color: #28a745;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding-bottom: 1000px;
+                /* 为固定面板预留空间 */
+            }
+
+            .problem-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .editor-container {
+                height: 400px;
+            }
+
+            .action-area {
+                position: fixed;
+                bottom: 0;
+                /* 紧贴视口底部 */
+                left: 0;
+                right: 0;
+                width: 100%;
+            }
+
+            .submit-btn {
+                width: 100%;
+                float: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/all_questions">题库</a>
+        </div>
+        <a href="#" class="login">登录</a>
+    </nav>
+
+    <div class="container">
+        <div class="problem-layout">
+            <div class="problem-description">
+                <h1 class="problem-title">{{number}}. {{title}}
+                    <span class="difficulty-tag {{difficultyClass}}">{{star}}</span>
+                </h1>
+                <pre>{{desc}}</pre>
+            </div>
+
+            <div class="editor-container" id="editor-container"></div>
+        </div>
+
+        <div class="action-area">
+            <button class="submit-btn" onclick="submitCode()">提交代码</button>
+            <div class="result-panel">
+                <div class="result-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置 Monaco Editor 路径
+        require.config({
+            paths: {
+                vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs'
+            }
+        });
+
+        let editor;
+
+        // 初始化编辑器
+        require(['vs/editor/editor.main'], function () {
+            editor = monaco.editor.create(document.getElementById('editor-container'), {
+                value: `{{pre_code}}`,
+                language: 'cpp',
+                theme: 'vs-dark',
+                fontSize: 17,
+                tabSize: 4,
+                minimap: {
+                    enabled: false
+                },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                roundedSelection: false,
+                padding: {
+                    top: 10
+                },
+                suggest: {
+                    snippetsPreventQuickSuggestions: false
+                }
+            });
+
+            // 窗口大小调整处理
+            window.addEventListener('resize', () => {
+                editor.layout();
+            });
+        });
+
+        // 提交代码
+        function displayResult(data) {
+            const resultContainer = document.querySelector('.result-content');
+            resultContainer.innerHTML = ''; // 清空之前的结果
+
+            // 处理错误状态
+            if (data.status !== 0) {
+                const errorBox = document.createElement('div');
+                errorBox.className = 'error-box';
+
+                // 根据状态码生成错误信息
+                let errorMessage = `❌ 错误类型: ${data.reason}\n`;
+                if (data.stderr) errorMessage += `\n错误详情:\n${data.stderr}`;
+                if (data.stdout) errorMessage += `\n输出信息:\n${data.stdout}`;
+
+                errorBox.textContent = errorMessage;
+                resultContainer.appendChild(errorBox);
+                return;
+            }
+
+            // 处理成功情况
+            if (data.stdout) {
+                const testResults = data.stdout.split('\n');
+                testResults.forEach(result => {
+                    if (result.trim() === '') return;
+
+                    const testCase = document.createElement('div');
+                    testCase.className = 'test-case ' +
+                        (result.includes('通过') ? 'passed' : 'failed');
+
+                    // 格式化输出结果
+                    const formattedResult = result
+                        .replace(/\.\.\. OK!/g, ' ✅')
+                        .replace(/没有通过/g, '❌ 失败');
+
+                    testCase.textContent = formattedResult;
+                    resultContainer.appendChild(testCase);
+                });
+            }
+        }
+
+        // 修改后的提交函数
+        async function submitCode() {
+            const code = editor.getValue();
+            const problemId = "{{number}}";
+            console.log("提交代码内容:", JSON.stringify(code));
+            console.log("代码长度:", code.length);
+            try {
+                const response = await fetch(`/judge/${problemId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code,
+                        input: '',
+                        cpu_limit: 1,
+                        mem_limit: 1024
+                    })
+                });
+
+                const result = await response.json();
+
+                // 强制显示错误面板
+                const resultPanel = document.querySelector('.result-panel');
+                resultPanel.classList.add('expanded');
+
+                // 处理不同状态码
+                if (result.status !== 0) {
+                    result.stdout = ""; // 清空可能存在的错误输出
+                }
+
+                displayResult({
+                    status: result.status,
+                    reason: result.reason,
+                    stdout: result.stdout,
+                    stderr: result.stderr
+                });
+
+                resultPanel.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error('提交失败:', error);
+                displayResult({
+                    status: -2,
+                    reason: '网络请求失败',
+                    stderr: '无法连接到判题服务器'
+                });
+            }
+        }
+    </script>
+
+    <style>
+        /* 结果面板样式 */
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .success {
+            color: #4ecca3;
+            background: rgba(78, 204, 163, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .error {
+            color: #dc3545;
+            background: rgba(220, 53, 69, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .time {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        pre {
+            line-height: 1.5;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+
+        .output {
+            color: #4ecca3;
+        }
+
+        .error {
+            color: #dc3545;
+        }
+    </style>
+</body>
+
+</html>

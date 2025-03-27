@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <atomic>
+#include <ctime>
 #include <string>
 #include <vector>
 #include <sys/types.h>
@@ -22,7 +23,14 @@ namespace ns_util
         {
             struct timeval tv;
             gettimeofday(&tv, nullptr);
-            return std::to_string(tv.tv_sec);
+
+            struct tm tm_time;
+            localtime_r(&tv.tv_sec, &tm_time); // 线程安全版本
+
+            char buffer[64];
+            strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", &tm_time);
+
+            return buffer;
         }
 
         static std::string GetTimeMs()
@@ -38,7 +46,7 @@ namespace ns_util
     public:
         static std::string AddSuffix(const std::string &file_name, const std::string &suffix)
         {
-            FILE* fh = fopen( "temp" , "r" );
+            FILE *fh = fopen("temp", "r");
             if (fh == NULL)
             {
                 int n = ::mkdir(temp_path.c_str(), 0777);
@@ -134,8 +142,8 @@ namespace ns_util
          * str : 需要切割的字符串
          * target : 输出型, 保存切分完毕的结果
          * sep : 指定的分隔符
-         * 
-        ************************/
+         *
+         ************************/
         static void SplitString(const std::string &str, std::vector<std::string> *target, std::string sep)
         {
             boost::split((*target), str, boost::is_any_of(sep), boost::algorithm::token_compress_on);

@@ -37,34 +37,18 @@ int main(int argc, char *argv[])
         else
         {
             resp.set_content("in_json为空", "application/json;setchar=utf-8");
-        }
-        });
-        
+        } });
+
+        svr.Get("/health", [](const Request &req, Response &res)
+                {
+                    res.status = 200; // 只需返回 200 状态码
+                });
+
         svr.listen("0.0.0.0", atoi(argv[1]));
     }
     catch (const std::exception &e)
     {
         std::cout << e.what() << '\n';
     }
-
-    // std::string in_json;
-    // Json::Value in_value;
-    // in_value["code"] = R"(#include <iostream>
-    // int main()
-    // {
-    //     while(1);
-    //     std::cout << "OK" << std::endl;
-    //     return 0;
-    // })";
-    // in_value["input"] = "";
-    // in_value["cpu_limit"] = 1;
-    // in_value["mem_limit"] = 10240 * 3;
-    // Json::FastWriter writer;
-    // in_json = writer.write(in_value);
-
-    // std::string out_json;
-    // CompileAndRun::Start(in_json, &out_json);
-    // std::cout << out_json << std::endl;
-
     return 0;
 }
