@@ -19,6 +19,56 @@ namespace ns_compile_and_run
     class CompileAndRun
     {
     public:
+        // 辅助函数：提取 class Solution {} 内部的全部内容
+        static std::string ExtractSolutionClassBody(const std::string &code)
+        {
+            const std::string class_start = "public:";
+            size_t class_pos = code.find(class_start);
+            if (class_pos == std::string::npos)
+            {
+                return "";
+            }
+
+            // 定位类的 { 和 }
+            size_t brace_open = code.find('{', class_pos);
+            size_t brace_close = code.find('}');
+            if (brace_open == std::string::npos || brace_close == std::string::npos)
+            {
+                return "";
+            }
+            return code.substr(brace_open + 1, brace_close - brace_open - 1);
+        }
+
+        // 检查类内部是否有有效代码（忽略注释和空白）
+        static bool HasValidCodeInSolution(const std::string &code)
+        {
+            std::string class_body = ExtractSolutionClassBody(code);
+            if (class_body.empty())
+            {
+                return false; // 无 Solution 类或类为空
+            }
+
+            // 检查是否存在非注释、非空白的字符
+            std::istringstream iss(class_body);
+            std::string line;
+            bool has_real_code = false;
+
+            while (std::getline(iss, line))
+            {
+                // 移除行首行尾空白
+                line.erase(0, line.find_first_not_of(" \t\r\n"));
+                line.erase(line.find_last_not_of(" \t\r\n") + 1);
+
+                // 如果不是空行且不是注释行
+                if (!line.empty() && line.find("//") != 0)
+                {
+                    has_real_code = true;
+                    break;
+                }
+            }
+            return has_real_code;
+        }
+
         static void RemoveTempFile(const std::string &file_name)
         {
             // 清理文件的个数是不确定的，但是有哪些我们是知道的
@@ -49,7 +99,6 @@ namespace ns_compile_and_run
         // code > 0 : 进程收到了信号导致异常奔溃
         // code < 0 : 整个过程非运行报错(代码为空，编译报错等)
         // code = 0 : 整个过程全部完成
-        // 待完善
         static std::string CodeToDesc(int code, const std::string &file_name)
         {
             std::string desc;
@@ -106,6 +155,7 @@ namespace ns_compile_and_run
          * ************************************/
         static void Start(const std::string &in_json, std::string *out_json)
         {
+
             Json::Value in_value;
             Json::Reader reader;
             reader.parse(in_json, in_value); // 最后在处理差错问题
@@ -114,14 +164,14 @@ namespace ns_compile_and_run
             std::string input = in_value["input"].asString();
             int cpu_limit = in_value["cpu_limit"].asInt();
             int mem_limit = in_value["mem_limit"].asInt();
-
             int status_code = 0;
             Json::Value out_value;
             int run_result = 0;
             std::string file_name; // 需要内部形成的唯一文件名
 
             // 检查有效代码内容（忽略注释和空行）
-            if (code.find_first_not_of(" \t\n//") == std::string::npos) {
+            if (!HasValidCodeInSolution(code))
+            {
                 status_code = -1;
                 goto END;
             }

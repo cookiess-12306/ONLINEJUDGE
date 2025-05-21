@@ -11,6 +11,6 @@ class Solution
 public:
     bool isPalindrome(long long x)
     {
-        // USER_CODE
+        if (x < 0) return false; long long y = 0, t = x; while (t) { y = y * 10 + t % 10; t /= 10; } return x == y;
     }
 };

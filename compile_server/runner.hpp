@@ -55,7 +55,6 @@ namespace ns_run
              * 2.代码跑完，运行错误
              * 3.代码没跑完，异常了
              * 不关心代码正确，是否正确，是由测试用例决定的
-             * 我们只考虑运行是否完毕
              *
              *
              * 前提得知道可执行程序是谁？？
@@ -97,7 +96,7 @@ namespace ns_run
                 dup2(_stdin_fd, 0);
                 dup2(_stdout_fd, 1);
                 dup2(_stderr_fd, 2);
-                SetProcLimit(cpu_limit, mem_limit);//仅影响子进程！！！！
+                SetProcLimit(cpu_limit, mem_limit); // 仅影响子进程！！！！
 
                 execl(_execute.c_str() /*执行谁*/, _execute.c_str() /*在命令行如何执行该程序*/, nullptr);
                 exit(1);

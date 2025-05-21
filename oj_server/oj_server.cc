@@ -18,6 +18,7 @@ int main()
     // 用户请求的服务器路由功能
     Server svr;
     Control ctrl;
+    Model userModel;
     ctrl_p = &ctrl;
 
     // 获取所有的题目列表

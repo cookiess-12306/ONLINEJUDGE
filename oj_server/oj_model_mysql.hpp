@@ -5,11 +5,11 @@
 #include <unordered_map>
 #include <fstream>
 #include <cstdlib>
-#include <cppconn/driver.h>
-#include <cppconn/exception.h>
-#include <cppconn/resultset.h>
-#include <cppconn/statement.h>
-#include <cppconn/prepared_statement.h>
+// #include <cppconn/driver.h>
+// #include <cppconn/exception.h>
+// #include <cppconn/resultset.h>
+// #include <cppconn/statement.h>
+// #include <cppconn/prepared_statement.h>
 #include <cassert>
 #include <memory>
 #include "../comm/log.hpp"
@@ -41,15 +41,13 @@ namespace ns_model_mysql
     const std::string db = "oj";
     const int port = 3306;
 
-    sql::Driver *driver;
-    std::unique_ptr<sql::Connection> conn;
-
     class Model
     {
     public:
         Model()
         {
         }
+
         bool QueryMySql(const std::string &sql, vector<Question> *out)
         {
             // 创建mysql句柄

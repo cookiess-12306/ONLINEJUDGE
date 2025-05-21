@@ -295,6 +295,7 @@ namespace ns_control
             }
             return ret;
         }
+
         // code: #include...
         // input: ""
         void Judge(const std::string &number, const std::string in_json, std::string *out_json)
