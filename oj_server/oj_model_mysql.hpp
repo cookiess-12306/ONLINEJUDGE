@@ -54,13 +54,12 @@ namespace ns_model_mysql
             MYSQL *my = mysql_init(nullptr);
 
             // 连接数据库
-            if (nullptr == mysql_real_connect(my, host.c_str(), user.c_str(), passwd.c_str(), db.c_str(), port, nullptr, 0))
+            if (mysql_real_connect(my, host.c_str(), user.c_str(), passwd.c_str(), db.c_str(), port, nullptr, 0) == nullptr)
             {
                 LOG(FATAL) << "连接数据库失败!" << "\n";
                 return false;
             }
 
-            // 一定要设置该链接的编码格式, 要不然会出现乱码问题
             mysql_set_character_set(my, "utf8");
 
             LOG(INFO) << "连接数据库成功!" << "\n";

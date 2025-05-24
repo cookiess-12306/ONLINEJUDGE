@@ -1,8 +1,10 @@
 #include "compile_run.hpp"
 #include <stdexcept>
+#include "ThreadPool.hpp"
 #include "../comm/httplib.h"
 using namespace ns_compile_and_run;
 using namespace httplib;
+using namespace ns_thread_pool;
 
 void Usage(std::string proc)
 {
@@ -23,21 +25,30 @@ int main(int argc, char *argv[])
         Server svr;
         // svr.Get("/hello", [](const Request &req, Response &resp)
         //         { resp.set_content("hello", "text/plain;charset=utf-8"); });
-
-        svr.Post("/compiler_run", [](const Request &req, Response &resp)
+        ns_thread_pool::ThreadPool pool(std::thread::hardware_concurrency());
+        svr.Post("/compiler_run", [&pool](const Request &req, Response &resp)
                  {
-        //用户请求的服务正文，就是我们需要的json string
+                    std::time_t now = std::time(nullptr);
+                    std::tm *timeinfo = std::localtime(&now);
+                    std::cerr << "[Log] Received request:\n" << req.body << "time:" << std::put_time(timeinfo, "%H:%M:%S") << std::endl;
+                    
         std::string in_json = req.body;
         std::string out_json;
-        if (!in_json.empty())
-        {
+
+        std::mutex mtx;
+        std::condition_variable cv;
+        bool done = false;
+
+        pool.enqueue([&]() {
             CompileAndRun::Start(in_json, &out_json);
-            resp.set_content(out_json, "application/json;setchar=utf-8");
-        }
-        else
-        {
-            resp.set_content("in_json为空", "application/json;setchar=utf-8");
-        } });
+            std::lock_guard<std::mutex> lock(mtx);
+            done = true;
+            cv.notify_one();
+        });
+
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [&done]() { return done; });
+        resp.set_content(out_json, "application/json;charset=utf-8"); });
 
         svr.Get("/health", [](const Request &req, Response &res)
                 {

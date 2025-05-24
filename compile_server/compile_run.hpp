@@ -198,7 +198,6 @@ namespace ns_compile_and_run
             {
                 status_code = -2; // 未知错误
                 LOG(ERROR) << "运行失败,文件名为: " << file_name << std::endl;
-                ;
             }
             else if (run_result > 0)
             {
